@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:protected_page/protected_page.dart';
-import 'package:protected_page/src/route_config.dart';
-import 'package:protected_page/src/access_guard.dart';
 
 void main() {
   group('AccessConfig and AccessPolicy Tests', () {
@@ -50,7 +48,7 @@ void main() {
         permissions: [],
       );
 
-      final policy = const AccessPolicy();
+      const policy = AccessPolicy();
 
       final result = await policy.validate(mockProvider);
 
@@ -63,7 +61,7 @@ void main() {
         permissions: [],
       );
 
-      final policy = const AccessPolicy(roles: ['admin']);
+      const policy = AccessPolicy(roles: ['admin']);
 
       final result = await policy.validate(mockProvider);
 
@@ -126,7 +124,7 @@ void main() {
         permissions: [],
       );
 
-      final policy = const AccessPolicy(
+      const policy = AccessPolicy(
         roles: ['role_4999'], // Último rol en la lista
       );
 
@@ -143,7 +141,7 @@ void main() {
         permissions: permissions,
       );
 
-      final policy = const AccessPolicy(
+      const policy = AccessPolicy(
         permissions: ['permission_4999'], // Último permiso en la lista
       );
 
@@ -159,12 +157,12 @@ void main() {
         permissions: ['permission_1', 'permission_2'],
       );
 
-      final policy1 = const AccessPolicy(
+      const policy1 = AccessPolicy(
         roles: ['role_1'],
         permissions: ['permission_1'],
       );
 
-      final policy2 = const AccessPolicy(
+      const policy2 = AccessPolicy(
         roles: ['role_2'],
         permissions: ['permission_2'],
       );
@@ -185,12 +183,12 @@ void main() {
         permissions: ['permission_1'],
       );
 
-      final policy1 = const AccessPolicy(
+      const policy1 = AccessPolicy(
         roles: ['role_1'],
         permissions: ['permission_1'],
       );
 
-      final policy2 = const AccessPolicy(
+      const policy2 = AccessPolicy(
         roles: ['role_2'], // Este rol no está presente
         permissions: ['permission_2'], // Este permiso no está presente
       );
@@ -218,12 +216,12 @@ void main() {
         permissions: ['permission_user2'],
       );
 
-      final policy1 = const AccessPolicy(
+      const policy1 = AccessPolicy(
         roles: ['role_user1'],
         permissions: ['permission_user1'],
       );
 
-      final policy2 = const AccessPolicy(
+      const policy2 = AccessPolicy(
         roles: ['role_user2'],
         permissions: ['permission_user2'],
       );
@@ -400,7 +398,7 @@ void main() {
         permissions: permissions,
       );
 
-      final policy = const AccessPolicy(
+      const policy = AccessPolicy(
         roles: ['role_999'],
         permissions: ['permission_999'],
       );
@@ -461,7 +459,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       initialRoute: '/dashboard',
       routes: {
-        '/dashboard': (context) => AccessGuard(
+        '/dashboard': (context) => const AccessGuard(
               routeName: '/dashboard',
               child: Scaffold(body: Text('Dashboard')),
             ),
@@ -495,7 +493,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       initialRoute: '/protected',
       routes: {
-        '/protected': (context) => AccessGuard(
+        '/protected': (context) => const AccessGuard(
               routeName: '/protected',
               child: Text('Protected Content'),
             ),

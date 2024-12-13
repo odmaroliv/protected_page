@@ -34,8 +34,9 @@ class TokenAccessProvider implements AccessProvider {
 
   @override
   Future<List<String>> getPermissions() async {
-    if (!AccessConfig.usePermissions)
+    if (!AccessConfig.usePermissions) {
       return []; // Ignora permisos si están deshabilitados
+    }
     try {
       final token = await tokenProvider();
       final decoded = await decodeToken(token);

@@ -10,8 +10,8 @@ class AccessGuard extends StatelessWidget {
     required this.routeName,
     required this.child,
     this.showLoader, // Si no se especifica, se usa la configuración global
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
