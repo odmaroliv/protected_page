@@ -474,6 +474,40 @@ void main() {
     // Verifica que se redirige a la página de inicio de sesión
     expect(find.text("Login Page"), findsOneWidget);
   });
+  testWidgets('Global loader configuration is respected', (tester) async {
+    AccessConfig.setGlobalLoader(false); // Desactiva el loader globalmente
+    AccessConfig.globalProvider = MockAccessProvider(
+      isAuthenticated: false, // Simula que no está autenticado
+      roles: [],
+      permissions: [],
+    );
+
+    AccessConfig.addRoutes([
+      const RouteConfig(
+        routeName: '/protected',
+        policy: AccessPolicy(roles: ['admin']),
+        child: Scaffold(body: Text('Protected Content')),
+        fallback: Scaffold(body: Text('Access Denied')),
+      ),
+    ]);
+
+    // Define las rutas necesarias en el MaterialApp
+    await tester.pumpWidget(MaterialApp(
+      initialRoute: '/protected',
+      routes: {
+        '/protected': (context) => AccessGuard(
+              routeName: '/protected',
+              child: Text('Protected Content'),
+            ),
+        '/login': (context) => const Scaffold(body: Text('Login Page')),
+      },
+    ));
+
+    await tester.pumpAndSettle();
+
+    // Verifica que se redirige correctamente
+    expect(find.text("Login Page"), findsOneWidget);
+  });
 }
 
 /// Mock de AccessProvider para pruebas

@@ -1,8 +1,8 @@
-# AccessGuard: Flutter Access Control and Permission Management Library
+# Protected Page: Flutter Access Control and Permission Management Library
 
 ## 📋 Table of Contents
 
-- [AccessGuard: Flutter Access Control and Permission Management Library](#accessguard-flutter-access-control-and-permission-management-library)
+- [Protected Page: Flutter Access Control and Permission Management Library](#protected-page-flutter-access-control-and-permission-management-library)
   - [📋 Table of Contents](#-table-of-contents)
   - [🚀 How to Configure the Library](#-how-to-configure-the-library)
     - [Basic Configuration](#basic-configuration)
@@ -13,7 +13,11 @@
   - [🔄 Asynchronous Validation](#-asynchronous-validation)
   - [🆕 New Features](#-new-features)
     - [Redirect to Login or Fallback Route](#redirect-to-login-or-fallback-route)
-      - [Configuration](#configuration)
+    - [Configuration](#configuration)
+    - [Global Loader Configuration](#global-loader-configuration)
+    - [Enable or Disable the Loader](#enable-or-disable-the-loader)
+    - [Customize the Global Loader](#customize-the-global-loader)
+    - [Example](#example)
   - [🚧 Advanced Use Cases](#-advanced-use-cases)
     - [Dynamic Global Fallback](#dynamic-global-fallback)
   - [📦 Installation](#-installation)
@@ -133,7 +137,7 @@ AccessConfig.addRoutes([
 
 If the user is not authenticated, you can configure a `redirectRoute` to send them to a login page or any other fallback route.
 
-#### Configuration
+### Configuration
 
 ```dart
 AccessConfig.setRedirectRoute('/login');
@@ -157,6 +161,71 @@ If redirectRoute is not set, the system will fall back to:
 
 The route-specific fallback, if provided.
 The global fallback, if no route-specific fallback is defined.
+
+### Global Loader Configuration
+
+\
+You can now control whether a loader is displayed globally during access validation. Use the `AccessConfig.setGlobalLoader` method to enable or disable this behavior.
+
+By default, the loader is enabled and shows a simple placeholder widget `(Center(child: CircularProgressIndicator()))`. You can disable it or provide a custom global loader widget.
+
+### Enable or Disable the Loader
+
+```dart
+// Enable the global loader (default behavior)
+AccessConfig.setGlobalLoader(true);
+
+// Disable the global loader
+AccessConfig.setGlobalLoader(false);
+```
+
+### Customize the Global Loader
+
+You can provide a custom global loader widget to override the default behavior.
+
+```dart
+// Set a custom loader globally
+AccessConfig.setGlobalLoaderWidget((context) => Center(child: Text('Loading, please wait...')));
+```
+
+### Example
+
+Here’s an example showing how to use the global loader feature:
+
+```dart
+void main() {
+  AccessConfig.setGlobalLoader(true); // Enable the loader globally
+  AccessConfig.setGlobalLoaderWidget((context) => Center(child: CircularProgressIndicator()));
+
+  AccessConfig.setRedirectRoute('/login');
+  AccessConfig.globalProvider = MockAccessProvider(
+    isAuthenticated: false,
+    roles: [],
+    permissions: [],
+  );
+
+  AccessConfig.addRoutes([
+    const RouteConfig(
+      routeName: '/dashboard',
+      policy: AccessPolicy(roles: ['admin']),
+      child: Scaffold(body: Text('Dashboard Page')),
+      fallback: Scaffold(body: Text('Access Denied')),
+    ),
+  ]);
+
+  runApp(MaterialApp(
+    initialRoute: '/dashboard',
+    routes: {
+      '/dashboard': (context) => AccessGuard(
+            routeName: '/dashboard',
+            child: Scaffold(body: Text('Dashboard Page')),
+          ),
+      '/login': (context) => const Scaffold(body: Text('Login Page')),
+    },
+  ));
+}
+
+```
 
 ## 🚧 Advanced Use Cases
 

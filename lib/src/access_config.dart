@@ -8,6 +8,7 @@ class AccessConfig {
   static String rolesKey = 'roles';
   static String permissionsKey = 'permissions';
   static bool usePermissions = false;
+  static bool globalShowLoader = true;
 
   static final List<RouteConfig> _routes = [];
   static AccessProvider? globalProvider;
@@ -95,5 +96,9 @@ class AccessConfig {
 
   static void setRedirectRoute(String route) {
     redirectRoute = route;
+  }
+
+  static void setGlobalLoader(bool value) {
+    globalShowLoader = value;
   }
 }
