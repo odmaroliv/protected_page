@@ -14,6 +14,7 @@ class AccessConfig {
   static final Map<String, List<String>> roleGroups = {};
   static Widget Function(BuildContext context)? globalFallback;
   static AccessTexts texts = AccessTexts.defaults();
+  static String? redirectRoute;
 
   /// Agrega rutas con su configuración
   static void addRoutes(List<RouteConfig> routes) {
@@ -90,5 +91,9 @@ class AccessConfig {
   static void setGlobalFallback(
       Widget Function(BuildContext context) fallback) {
     globalFallback = fallback;
+  }
+
+  static void setRedirectRoute(String route) {
+    redirectRoute = route;
   }
 }

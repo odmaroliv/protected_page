@@ -22,7 +22,15 @@ class AccessGuard extends StatelessWidget {
 
         if (snapshot.hasError || !(snapshot.data ?? false)) {
           debugPrint('AccessGuard: Access denied for route $routeName.');
-          return AccessConfig.getFallback(routeName, context);
+
+          if (AccessConfig.redirectRoute != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.pushReplacementNamed(
+                  context, AccessConfig.redirectRoute!);
+            });
+          } else {
+            return AccessConfig.getFallback(routeName, context);
+          }
         }
 
         return child;

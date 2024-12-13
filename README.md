@@ -11,6 +11,9 @@
   - [🛡️ Protecting Widgets with AccessGuard](#️-protecting-widgets-with-accessguard)
   - [🔒 Protecting Routes with GetX](#-protecting-routes-with-getx)
   - [🔄 Asynchronous Validation](#-asynchronous-validation)
+  - [🆕 New Features](#-new-features)
+    - [Redirect to Login or Fallback Route](#redirect-to-login-or-fallback-route)
+      - [Configuration](#configuration)
   - [🚧 Advanced Use Cases](#-advanced-use-cases)
     - [Dynamic Global Fallback](#dynamic-global-fallback)
   - [📦 Installation](#-installation)
@@ -123,6 +126,37 @@ AccessConfig.addRoutes([
   ),
 ]);
 ```
+
+## 🆕 New Features
+
+### Redirect to Login or Fallback Route
+
+If the user is not authenticated, you can configure a `redirectRoute` to send them to a login page or any other fallback route.
+
+#### Configuration
+
+```dart
+AccessConfig.setRedirectRoute('/login');
+
+MaterialApp(
+  initialRoute: '/dashboard',
+  routes: {
+    '/dashboard': (context) => AccessGuard(
+          routeName: '/dashboard',
+          child: const DashboardPage(),
+        ),
+    '/login': (context) => const Scaffold(body: Text('Login Page')),
+  },
+);
+```
+
+If the user is not authenticated, they will automatically be redirected to /login.
+
+**Behavior without** `redirectRoute`
+If redirectRoute is not set, the system will fall back to:
+
+The route-specific fallback, if provided.
+The global fallback, if no route-specific fallback is defined.
 
 ## 🚧 Advanced Use Cases
 

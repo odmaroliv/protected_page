@@ -410,6 +410,70 @@ void main() {
       expect(result, isTrue);
     });
   });
+
+  testWidgets('AccessGuard shows fallback when no redirectRoute is set',
+      (tester) async {
+    AccessConfig.globalProvider = MockAccessProvider(
+      isAuthenticated: false,
+      roles: [],
+      permissions: [],
+    );
+
+    AccessConfig.addRoutes([
+      const RouteConfig(
+        routeName: '/dashboard',
+        policy: AccessPolicy(roles: ['admin']),
+        child: Scaffold(body: Text('Dashboard')),
+        fallback: Scaffold(body: Text('Access Denied')),
+      ),
+    ]);
+
+    await tester.pumpWidget(const MaterialApp(
+      home: AccessGuard(
+        routeName: '/dashboard',
+        child: Text('Dashboard'),
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+
+    // Verifica que muestra el fallback
+    expect(find.text("Access Denied"), findsOneWidget);
+  });
+
+  testWidgets('AccessGuard redirects to redirectRoute when set',
+      (tester) async {
+    AccessConfig.setRedirectRoute('/login');
+    AccessConfig.globalProvider = MockAccessProvider(
+      isAuthenticated: false,
+      roles: [],
+      permissions: [],
+    );
+
+    AccessConfig.addRoutes([
+      const RouteConfig(
+        routeName: '/dashboard',
+        policy: AccessPolicy(roles: ['admin']),
+        child: Scaffold(body: Text('Dashboard')),
+      ),
+    ]);
+
+    await tester.pumpWidget(MaterialApp(
+      initialRoute: '/dashboard',
+      routes: {
+        '/dashboard': (context) => AccessGuard(
+              routeName: '/dashboard',
+              child: Scaffold(body: Text('Dashboard')),
+            ),
+        '/login': (context) => const Scaffold(body: Text('Login Page')),
+      },
+    ));
+
+    await tester.pumpAndSettle();
+
+    // Verifica que se redirige a la página de inicio de sesión
+    expect(find.text("Login Page"), findsOneWidget);
+  });
 }
 
 /// Mock de AccessProvider para pruebas
