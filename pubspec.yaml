@@ -1,10 +1,10 @@
 name: protected_page
-description: "A new Flutter package project."
+description: "Flutter Access Control and Permission Management Library."
 version: 0.0.1
 homepage:
 
 environment:
-  sdk: '>=3.4.3 <4.0.0'
+  sdk: ">=3.4.3 <4.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
