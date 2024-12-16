@@ -3,13 +3,13 @@ import 'access_config.dart';
 
 class AccessGuard extends StatelessWidget {
   final String routeName;
-  final Widget child;
-  final bool? showLoader; // Permite sobrescribir la configuración global
+  final Widget Function(BuildContext) childBuilder;
+  final bool? showLoader;
 
   const AccessGuard({
     required this.routeName,
-    required this.child,
-    this.showLoader, // Si no se especifica, se usa la configuración global
+    required this.childBuilder,
+    this.showLoader,
     super.key,
   });
 
@@ -41,7 +41,7 @@ class AccessGuard extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        return child;
+        return childBuilder(context);
       },
     );
   }

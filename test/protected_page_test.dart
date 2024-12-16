@@ -20,18 +20,18 @@ void main() {
       );
 
       AccessConfig.addRoutes([
-        const RouteConfig(
+        RouteConfig(
           routeName: '/settings',
           policy: AccessPolicy(permissions: ['write']),
-          child: Scaffold(body: Text('Settings Page')),
+          childBuilder: (_) => Scaffold(body: Text('Settings Page')),
           fallback: Scaffold(body: Text('Access Denied')),
         ),
       ]);
 
-      await tester.pumpWidget(const MaterialApp(
+      await tester.pumpWidget(MaterialApp(
         home: AccessGuard(
           routeName: '/settings',
-          child: Text('Settings Page'),
+          childBuilder: (_) => Text('Settings Page'),
         ),
       ));
 
@@ -72,18 +72,18 @@ void main() {
       AccessConfig.globalProvider = null;
 
       AccessConfig.addRoutes([
-        const RouteConfig(
+        RouteConfig(
           routeName: '/secure',
           policy: AccessPolicy(roles: ['admin']),
-          child: Scaffold(body: Text('Secure Page')),
+          childBuilder: (_) => Scaffold(body: Text('Secure Page')),
           fallback: Scaffold(body: Text('Access Denied')),
         ),
       ]);
 
-      await tester.pumpWidget(const MaterialApp(
+      await tester.pumpWidget(MaterialApp(
         home: AccessGuard(
           routeName: '/secure',
-          child: Text('Secure Page'),
+          childBuilder: (_) => Text('Secure Page'),
         ),
       ));
 
@@ -97,17 +97,17 @@ void main() {
           (context) => const Scaffold(body: Text('Global Fallback')));
 
       AccessConfig.addRoutes([
-        const RouteConfig(
+        RouteConfig(
           routeName: '/no-fallback',
           policy: AccessPolicy(roles: ['admin']),
-          child: Scaffold(body: Text('Protected Page')),
+          childBuilder: (_) => Scaffold(body: Text('Protected Page')),
         ),
       ]);
 
-      await tester.pumpWidget(const MaterialApp(
+      await tester.pumpWidget(MaterialApp(
         home: AccessGuard(
           routeName: '/no-fallback',
-          child: Text('Protected Page'),
+          childBuilder: (_) => Text('Protected Page'),
         ),
       ));
 
@@ -249,10 +249,10 @@ void main() {
       AccessConfig.setGlobalFallback(
           (context) => const Scaffold(body: Text('Global Fallback')));
 
-      await tester.pumpWidget(const MaterialApp(
+      await tester.pumpWidget(MaterialApp(
         home: AccessGuard(
           routeName: '/undefined',
-          child: Scaffold(body: Text("Should not appear")),
+          childBuilder: (_) => Scaffold(body: Text("Should not appear")),
         ),
       ));
 
@@ -270,47 +270,18 @@ void main() {
       );
 
       AccessConfig.addRoutes([
-        const RouteConfig(
+        RouteConfig(
           routeName: '/dashboard',
           policy: AccessPolicy(roles: ['admin']),
-          child: Scaffold(body: Text('Dashboard')),
-          fallback: Scaffold(body: Text('Access Denied')),
+          childBuilder: (_) => Scaffold(body: Text('Dashboard')),
+          fallback: const Scaffold(body: Text('Access Denied')),
         ),
       ]);
 
-      await tester.pumpWidget(const MaterialApp(
+      await tester.pumpWidget(MaterialApp(
         home: AccessGuard(
           routeName: '/dashboard',
-          child: Scaffold(body: Text('Dashboard')),
-        ),
-      ));
-
-      await tester.pumpAndSettle();
-
-      expect(find.text("Access Denied"), findsOneWidget);
-    });
-
-    testWidgets('AccessConfig denies access when roles do not match',
-        (tester) async {
-      AccessConfig.globalProvider = MockAccessProvider(
-        isAuthenticated: true,
-        roles: ['user'],
-        permissions: [],
-      );
-
-      AccessConfig.addRoutes([
-        const RouteConfig(
-          routeName: '/dashboard',
-          policy: AccessPolicy(roles: ['admin']),
-          child: Scaffold(body: Text('Dashboard')),
-          fallback: Scaffold(body: Text('Access Denied')),
-        ),
-      ]);
-
-      await tester.pumpWidget(const MaterialApp(
-        home: AccessGuard(
-          routeName: '/dashboard',
-          child: Text('Dashboard'),
+          childBuilder: (_) => const Scaffold(body: Text('Dashboard')),
         ),
       ));
 
@@ -329,17 +300,17 @@ void main() {
       );
 
       AccessConfig.addRoutes([
-        const RouteConfig(
+        RouteConfig(
           routeName: '/admin-area',
           policy: AccessPolicy(roles: ['admins']),
-          child: Scaffold(body: Text('Admin Area')),
+          childBuilder: (_) => const Scaffold(body: Text('Admin Area')),
         ),
       ]);
 
-      await tester.pumpWidget(const MaterialApp(
+      await tester.pumpWidget(MaterialApp(
         home: AccessGuard(
           routeName: '/admin-area',
-          child: Scaffold(body: Text('Admin Area')),
+          childBuilder: (_) => const Scaffold(body: Text('Admin Area')),
         ),
       ));
 
@@ -418,24 +389,23 @@ void main() {
     );
 
     AccessConfig.addRoutes([
-      const RouteConfig(
+      RouteConfig(
         routeName: '/dashboard',
         policy: AccessPolicy(roles: ['admin']),
-        child: Scaffold(body: Text('Dashboard')),
-        fallback: Scaffold(body: Text('Access Denied')),
+        childBuilder: (_) => const Scaffold(body: Text('Dashboard')),
+        fallback: const Scaffold(body: Text('Access Denied')),
       ),
     ]);
 
-    await tester.pumpWidget(const MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: AccessGuard(
         routeName: '/dashboard',
-        child: Text('Dashboard'),
+        childBuilder: (_) => const Text('Dashboard'),
       ),
     ));
 
     await tester.pumpAndSettle();
 
-    // Verifica que muestra el fallback
     expect(find.text("Access Denied"), findsOneWidget);
   });
 
@@ -449,19 +419,19 @@ void main() {
     );
 
     AccessConfig.addRoutes([
-      const RouteConfig(
+      RouteConfig(
         routeName: '/dashboard',
         policy: AccessPolicy(roles: ['admin']),
-        child: Scaffold(body: Text('Dashboard')),
+        childBuilder: (_) => const Scaffold(body: Text('Dashboard')),
       ),
     ]);
 
     await tester.pumpWidget(MaterialApp(
       initialRoute: '/dashboard',
       routes: {
-        '/dashboard': (context) => const AccessGuard(
+        '/dashboard': (context) => AccessGuard(
               routeName: '/dashboard',
-              child: Scaffold(body: Text('Dashboard')),
+              childBuilder: (_) => const Scaffold(body: Text('Dashboard')),
             ),
         '/login': (context) => const Scaffold(body: Text('Login Page')),
       },
@@ -469,9 +439,9 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Verifica que se redirige a la página de inicio de sesión
     expect(find.text("Login Page"), findsOneWidget);
   });
+
   testWidgets('Global loader configuration is respected', (tester) async {
     AccessConfig.setGlobalLoader(false); // Desactiva el loader globalmente
     AccessConfig.globalProvider = MockAccessProvider(
@@ -481,11 +451,11 @@ void main() {
     );
 
     AccessConfig.addRoutes([
-      const RouteConfig(
+      RouteConfig(
         routeName: '/protected',
-        policy: AccessPolicy(roles: ['admin']),
-        child: Scaffold(body: Text('Protected Content')),
-        fallback: Scaffold(body: Text('Access Denied')),
+        policy: const AccessPolicy(roles: ['admin']),
+        childBuilder: (_) => Scaffold(body: Text('Protected Content')),
+        fallback: const Scaffold(body: Text('Access Denied')),
       ),
     ]);
 
@@ -493,9 +463,9 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       initialRoute: '/protected',
       routes: {
-        '/protected': (context) => const AccessGuard(
+        '/protected': (context) => AccessGuard(
               routeName: '/protected',
-              child: Text('Protected Content'),
+              childBuilder: (_) => const Text('Protected Content'),
             ),
         '/login': (context) => const Scaffold(body: Text('Login Page')),
       },

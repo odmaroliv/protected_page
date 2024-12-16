@@ -4,6 +4,7 @@
 
 - [Protected Page: Flutter Access Control and Permission Management Library](#protected-page-flutter-access-control-and-permission-management-library)
   - [📋 Table of Contents](#-table-of-contents)
+  - [⚠️ Important](#️-important)
   - [🚀 How to Configure the Library](#-how-to-configure-the-library)
     - [Basic Configuration](#basic-configuration)
     - [Roles and Permissions Configuration](#roles-and-permissions-configuration)
@@ -26,6 +27,12 @@
   - [📄 License](#-license)
   - [📬 Contact](#-contact)
 
+## ⚠️ Important
+
+As of version 0.0.2, `child` has been replaced by `childBuilder` in `RouteConfig` and `AccessGuard`. This ensures that protected widgets are only built when accessed, improving application performance.
+
+Please refer to the [CHANGELOG](./CHANGELOG.md) for more details on the changes and their impact.
+
 ## 🚀 How to Configure the Library
 
 ### Basic Configuration
@@ -47,7 +54,6 @@ void main() {
     },
   );
 
-  // Configure a global fallback
   AccessConfig.setGlobalFallback(
     (context) => Scaffold(
       body: Center(child: Text('Access Denied.')),
@@ -70,13 +76,13 @@ AccessConfig.addRoutes([
   RouteConfig(
     routeName: '/dashboard',
     policy: AccessPolicy(roles: ['admin']),
-    child: const DashboardPage(),
-    fallback: Scaffold(body: Text('Access Denied')),
+    childBuilder: (_) => const DashboardPage(),
+    fallback: const Scaffold(body: Text('Access Denied')),
   ),
   RouteConfig(
     routeName: '/settings',
     policy: AccessPolicy(permissions: ['write']),
-    child: const SettingsPage(),
+    childBuilder: (_)=> SettingsPage(),
   ),
 ]);
 ```
@@ -90,7 +96,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: AccessGuard(
         routeName: '/dashboard',
-        child: const DashboardPage(),
+        childBuilder: (_) =>DashboardPage(),
       ),
     );
   }
@@ -105,7 +111,7 @@ final List appRoutes = [
     name: '/dashboard',
     page: () => AccessGuard(
       routeName: '/dashboard',
-      child: const DashboardPage(),
+      childBuilder: (_)=> DashboardPage(),
     ),
   ),
   // More routes...
@@ -121,12 +127,11 @@ AccessConfig.addRoutes([
     policy: AccessPolicy(
       roles: ['user'],
       customValidator: () async {
-        // Simulate external validation
         await Future.delayed(const Duration(seconds: 2));
         return true;
       },
     ),
-    child: const ProfilePage(),
+    childBuilder: (_)=> ProfilePage(),
   ),
 ]);
 ```
@@ -142,16 +147,6 @@ If the user is not authenticated, you can configure a `redirectRoute` to send th
 ```dart
 AccessConfig.setRedirectRoute('/login');
 
-MaterialApp(
-  initialRoute: '/dashboard',
-  routes: {
-    '/dashboard': (context) => AccessGuard(
-          routeName: '/dashboard',
-          child: const DashboardPage(),
-        ),
-    '/login': (context) => const Scaffold(body: Text('Login Page')),
-  },
-);
 ```
 
 If the user is not authenticated, they will automatically be redirected to /login.
@@ -164,7 +159,6 @@ The global fallback, if no route-specific fallback is defined.
 
 ### Global Loader Configuration
 
-\
 You can now control whether a loader is displayed globally during access validation. Use the `AccessConfig.setGlobalLoader` method to enable or disable this behavior.
 
 By default, the loader is enabled and shows a simple placeholder widget `(Center(child: CircularProgressIndicator()))`. You can disable it or provide a custom global loader widget.
@@ -208,7 +202,7 @@ void main() {
     const RouteConfig(
       routeName: '/dashboard',
       policy: AccessPolicy(roles: ['admin']),
-      child: Scaffold(body: Text('Dashboard Page')),
+      childBuilder:(_)=> Scaffold(body: Text('Dashboard Page')),
       fallback: Scaffold(body: Text('Access Denied')),
     ),
   ]);
@@ -218,7 +212,7 @@ void main() {
     routes: {
       '/dashboard': (context) => AccessGuard(
             routeName: '/dashboard',
-            child: Scaffold(body: Text('Dashboard Page')),
+            childBuilder: (_)=>Scaffold(body: Text('Dashboard Page')),
           ),
       '/login': (context) => const Scaffold(body: Text('Login Page')),
     },

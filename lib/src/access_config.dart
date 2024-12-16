@@ -17,21 +17,15 @@ class AccessConfig {
   static AccessTexts texts = AccessTexts.defaults();
   static String? redirectRoute;
 
-  /// Agrega rutas con su configuración
+  /// Registra rutas protegidas
   static void addRoutes(List<RouteConfig> routes) {
     _routes.addAll(routes);
   }
 
-  /// Valida el acceso para una ruta
+  /// Valida el acceso a una ruta
   static Future<bool> canAccess(String routeName) async {
-    final route = _routes.firstWhere(
-      (config) => config.routeName == routeName,
-      orElse: () => const RouteConfig(
-        routeName: '',
-        policy: AccessPolicy(),
-        child: Scaffold(body: Center(child: Text("No page defined"))),
-      ),
-    );
+    final route = _findRoute(routeName);
+    if (route == null) return false;
 
     final provider = globalProvider;
     if (provider == null) {
@@ -42,18 +36,19 @@ class AccessConfig {
     return route.policy.validate(provider);
   }
 
-  /// Obtiene el fallback para una ruta
-  static Widget getFallback(String routeName, BuildContext context) {
-    final route = _routes.firstWhere(
-      (config) => config.routeName == routeName,
-      orElse: () => const RouteConfig(
-        routeName: '',
-        policy: AccessPolicy(),
-        child: Scaffold(body: Center(child: Text("No page defined"))),
-      ),
-    );
+  /// Encuentra una ruta registrada
+  static RouteConfig? _findRoute(String routeName) {
+    return _routes.cast<RouteConfig?>().firstWhere(
+          (config) => config?.routeName == routeName,
+          orElse: () => null, // Devuelve null si no encuentra la ruta
+        );
+  }
 
-    return route.fallback ??
+  /// Obtiene el fallback para una ruta protegida
+  static Widget getFallback(String routeName, BuildContext context) {
+    final route = _findRoute(routeName);
+
+    return route?.fallback ??
         globalFallback?.call(context) ??
         Scaffold(body: Center(child: Text(texts.accessDenied)));
   }
@@ -73,19 +68,9 @@ class AccessConfig {
     }
   }
 
-  /// Configura si se usan permisos
-  static void setUsePermissions(bool value) {
-    AccessConfig.usePermissions = value;
-  }
-
   /// Registra un grupo de roles
   static void registerRoleGroup(String groupName, List<String> roles) {
     roleGroups[groupName] = roles;
-  }
-
-  /// Obtiene los roles de un grupo
-  static List<String> getRolesFromGroup(String groupName) {
-    return roleGroups[groupName] ?? [];
   }
 
   /// Configura fallback global
@@ -100,5 +85,9 @@ class AccessConfig {
 
   static void setGlobalLoader(bool value) {
     globalShowLoader = value;
+  }
+
+  static List<String> getRolesFromGroup(String groupName) {
+    return roleGroups[groupName] ?? [];
   }
 }

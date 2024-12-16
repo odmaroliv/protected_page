@@ -19,18 +19,19 @@ class AccessConfig {
     _routes.addAll(routes);
   }
 
+  /// Configura el acceso a una ruta de forma protegida
   static Widget protect(String routeName, BuildContext context) {
     final route = _routes.firstWhere(
       (config) => config.routeName == routeName,
-      orElse: () => const RouteConfig(
+      orElse: () => RouteConfig(
         routeName: '',
         policy: AccessPolicy(),
-        child: Scaffold(body: Center(child: Text("No page defined"))),
+        childBuilder: (_) => Scaffold(
+            body: Center(child: Text("No page defined"))), // Usamos builder
       ),
     );
 
     final provider = globalProvider;
-
     if (provider == null) {
       return route.fallback ??
           globalFallback?.call(context) ??
@@ -50,7 +51,8 @@ class AccessConfig {
               Scaffold(body: Center(child: Text(texts.accessDenied)));
         }
 
-        return route.child;
+        // Usamos el builder para crear el widget solo cuando sea necesario
+        return route.childBuilder(context);
       },
     );
   }
