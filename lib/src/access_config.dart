@@ -90,4 +90,9 @@ class AccessConfig {
   static List<String> getRolesFromGroup(String groupName) {
     return roleGroups[groupName] ?? [];
   }
+
+  /// Configura si se usan permisos en las políticas de acceso
+  static void setUsePermissions(bool value) {
+    AccessConfig.usePermissions = value;
+  }
 }
