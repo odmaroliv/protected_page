@@ -1,4 +1,10 @@
-# 0.0.2
+# 0.0.3
+
+- Improved documentation.
+- Added better usage examples with GetX.
+- No functional changes to the code.
+
+## 0.0.2
 
 ## Breaking Changes
 

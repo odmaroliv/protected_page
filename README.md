@@ -10,7 +10,7 @@
     - [Roles and Permissions Configuration](#roles-and-permissions-configuration)
     - [Adding Routes and Policies](#adding-routes-and-policies)
   - [🛡️ Protecting Widgets with AccessGuard](#️-protecting-widgets-with-accessguard)
-  - [🔒 Protecting Routes with GetX](#-protecting-routes-with-getx)
+  - [🔒 Real-World Example with GetX Integration](#-real-world-example-with-getx-integration)
   - [🔄 Asynchronous Validation](#-asynchronous-validation)
   - [🆕 New Features](#-new-features)
     - [Redirect to Login or Fallback Route](#redirect-to-login-or-fallback-route)
@@ -103,19 +103,131 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-## 🔒 Protecting Routes with GetX
+## 🔒 Real-World Example with GetX Integration
+
+AppRoutes integrates the application's route configuration into GetX.
+It converts a custom list of `RouteConfig` objects into `GetPage` routes
+using the `toGetXPages` extension.
+
+This structure keeps route definitions centralized and reusable, making it
+easier to migrate to other routing technologies like Navigator 2.0 or
+Flutter's GoRouter. If migrating, replace `GetPage` with the desired route
+structure and adjust the extension method accordingly.
 
 ```dart
-final List appRoutes = [
-  GetPage(
-    name: '/dashboard',
-    page: () => AccessGuard(
-      routeName: '/dashboard',
-      childBuilder: (_)=> DashboardPage(),
+/// GetX AppRoutes
+class AppRoutes {
+  static final List<GetPage> routes = AppRouteConfig.routes.toGetXPages();
+}
+```
+
+AppRouteConfig holds the list of all application routes as `RouteConfig` objects.
+Each route includes: - `routeName`: The route's path. - `policy`: Defines role-based access using `AccessPolicy`. - `childBuilder`: A builder for the widget that represents the page.
+
+This abstraction decouples route definitions from any specific routing library.
+To migrate to another routing solution, map `RouteConfig` to the target library's
+route representation (e.g., Navigator 2.0's RouteInformationParser).
+
+```dart
+/// AppRouteConfig
+class AppRouteConfig {
+  static final List<RouteConfig> routes = [
+    RouteConfig(
+      routeName: '/',
+      policy: AccessPolicy(roles: ['Admin', 'Supervisor', 'Operador']),
+      childBuilder: (_) => HomeView(),
     ),
-  ),
-  // More routes...
-];
+    RouteConfig(
+      routeName: '/login',
+      policy: AccessPolicy(),
+      childBuilder: (_) => LoginView(),
+    ),
+    // Or use role gorup
+    RouteConfig(
+      routeName: '/reports',
+      policy: AccessPolicy(roles: ['AdminSupervisor']),
+      childBuilder: (_) => ReportView(),
+    ),
+  ];
+}
+
+```
+
+Protect initializes the configuration for the Protected Page library and
+connects it with GetX. It sets up global settings, such as: - Role/permission keys for token decoding. - Global access provider for role validation. - Fallback widget for denied access. - Route redirection for unauthenticated users.
+
+This class ensures role-based access control works across the app.
+To migrate to another access management solution, replace `AccessConfig`
+with a custom or alternative solution (e.g., implementing middleware in GoRouter).
+
+```dart
+// Protect
+class Protect {
+static void inicialiceProtectPage() {
+AccessConfig.setKeys(rolesKey: 'role', permissionsKey: 'user_permissions');
+
+    AccessConfig.globalProvider = TokenAccessProvider(
+      tokenProvider: () => TokenUtil.getTokenAsync(),
+      decodeToken: (token) async => {
+        'role': ['Admin', 'Supervisor', 'Operador'],
+      },
+    );
+
+    AccessConfig.setGlobalFallback(
+      (context) => const Scaffold(
+        body: Center(child: Text('Access Denied')),
+      ),
+    );
+
+    //Role group
+    AccessConfig.registerRoleGroup('AdminSupervisor', ['Admin', 'Supervisor']);
+
+    AccessConfig.globalShowLoader = true;
+    AccessConfig.setRedirectRoute('/login');
+
+    AccessConfig.addRoutes(AppRouteConfig.routes);
+
+  }
+}
+```
+
+This extension converts the custom `RouteConfig` format into GetX's `GetPage` routes. - Public routes (e.g., `/login`, `/auth-operator`) bypass `AccessGuard`. - Protected routes use `AccessGuard` to enforce role-based access validation.
+
+If migrating to another routing library, adapt this extension to map
+`RouteConfig` to the new library's route format. For example, replace `GetPage`
+with Navigator 2.0 routes or GoRouter routes.
+
+```dart
+/// RouteConfigToGetX
+extension RouteConfigToGetX on List<RouteConfig> {
+  List<GetPage> toGetXPages() {
+    return map((route) {
+      // No usar AccessGuard en rutas públicas
+      if (route.routeName == '/login') {
+        return GetPage(
+          name: route.routeName,
+          page: () => route.childBuilder(Get.context!),
+        );
+      }
+      if (route.routeName == '/auth-operator') {
+        return GetPage(
+          name: route.routeName,
+          page: () => route.childBuilder(Get.context!),
+        );
+      }
+
+      // Usar AccessGuard para rutas protegidas
+      return GetPage(
+        name: route.routeName,
+        page: () => AccessGuard(
+          routeName: route.routeName,
+          childBuilder: route.childBuilder,
+        ),
+      );
+    }).toList();
+  }
+}
+
 ```
 
 ## 🔄 Asynchronous Validation

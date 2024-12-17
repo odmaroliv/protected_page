@@ -1,6 +1,11 @@
 name: protected_page
-description: "Flutter Access Control and Permission Management Library."
-version: 0.0.2
+description: >
+  A Flutter library for managing access control and permissions with ease. 
+  Provides a flexible way to protect routes, widgets, and features using 
+  roles and permissions. Ideal for applications requiring role-based access 
+  management (RBAC) with seamless integration into Flutter frameworks like GetX.
+
+version: 0.0.3
 homepage: https://github.com/odmaroliv/protected_page
 
 environment:
